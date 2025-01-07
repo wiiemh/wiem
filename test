@@ -1,0 +1,43 @@
+#!/bin/bash
+# Write your Github User name Here
+export UserName="wwiiemh"            
+
+# Create a new branch called Update_branch
+git checkout -b Update_branch
+
+# Create an empty file named bash/98
+touch bash/98
+
+# Update bash/best to replace echo "Tekouin" with echo "Hi Tekouin"
+sed -i 's/echo "Tekouin"/echo "Hi Tekouin"/' bash/best
+
+# Update bash/school to replace echo "Santander" with echo "Hi Santander"
+sed -i 's/echo "Santander"/echo "Hi Santander"/' bash/school
+
+# Add the changes to the staging area
+git add bash/98 bash/best bash/school
+
+# Commit the changes with the message "My personal work"
+git commit -m "My personal work"
+
+# Push the Update_branch to the remote repository
+git push origin Update_branch
+
+# Switch to the main branch
+git checkout main
+
+# Update bash/best to replace echo "Tekouin" with echo "Tekouin is so cool!"
+sed -i 's/echo "Tekouin"/echo "Tekouin is so cool!"/' bash/best
+
+# Delete the python directory
+rm -r python
+
+# Add the changes to the staging area
+git add bash/best
+git rm -r python
+
+# Commit the changes with the message "Hot fix"
+git commit -m "Hot fix"
+
+# Push the changes to the main branch
+git push origin main
