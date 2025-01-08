@@ -1,6 +1,6 @@
 #!/bin/bash
 # Write your Github User name Here
-export UserName="wwiiemh"            
+export UserName="wiiemh"            
 
 # Create a new branch called Update_branch
 git checkout -b Update_branch
