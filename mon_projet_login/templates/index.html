@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Signup</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div class="form-toggle">
+                <button id="login-toggle" onclick="toggleLogin()">Login</button>
+                <button id="signup-toggle" onclick="toggleSignup()">Signup</button>
+            </div>
+            <div class="form-content">
+                <!-- Formulaire de Login -->
+                <form id="login-form" class="form" action="{{ url_for('login') }}" method="POST">
+                    <h2>Login</h2>
+                    <input type="email" name="email" placeholder="Email" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <button type="submit">Login</button>
+                </form>
+
+                <!-- Formulaire de Signup -->
+                <form id="signup-form" class="form hidden" action="{{ url_for('signup') }}" method="POST">
+                    <h2>Signup</h2>
+                    <input type="text" name="name" placeholder="Nom" required>
+                    <input type="email" name="email" placeholder="Email" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <button type="submit">Signup</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
