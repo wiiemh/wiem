@@ -39,8 +39,8 @@ body {
 }
 
 .form-toggle button.active {
-    border-bottom: 2px solid #007bff;
-    color: #007bff;
+    border-bottom: 2px solid #e0518d;
+    color: #000000;
 }
 
 .form-content {
@@ -66,7 +66,7 @@ body {
 
 .form button {
     padding: 10px;
-    background-color: #007bff;
+    background-color: #e0518d;
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -75,7 +75,7 @@ body {
 }
 
 .form button:hover {
-    background-color: #0056b3;
+    background-color: #e0518d;
 }
 
 .flash-messages {
@@ -90,10 +90,110 @@ body {
 
 .flash.success {
     background-color: #d4edda;
-    color: #155724;
+    color: #1a9a38;
 }
 
 .flash.error {
-    background-color: #f8d7da;
-    color: #721c24;
+    background-color: #d4edda;
+    color: #fb0019;
+}
+
+/* Styles spécifiques pour le dashboard */
+.dashboard-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 1200px;
+    text-align: center;
+    margin: 20px auto;
+}
+
+.dashboard-content {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+.card {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 45%;
+    text-align: left;
+}
+
+.card h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+.card p {
+    color: #555;
+}
+
+.card ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.card ul li {
+    background-color: #e0518d;
+    color: #fff;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.dashboard-container a {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #e0518d;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.dashboard-container a:hover {
+    background-color: #d4467f;
+}
+/* Styles pour le tableau */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+table th {
+    background-color: #e0518d;
+    color: #fff;
+}
+
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Styles pour les boutons d'action */
+a {
+    color: #e0518d;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+a:hover {
+    text-decoration: underline;
 }

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #000000;
+            margin-bottom: 20px;
+        }
+        a {
+            text-decoration: none;
+            color: #fff;
+            background-color: #e0518d;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        a:hover {
+            background-color: #e0518d;
+        }
+        table {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-collapse: collapse;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #e0518d;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .actions a {
+            margin-right: 10px;
+            padding: 5px 10px;
+            background-color: #28a745;
+            border-radius: 3px;
+        }
+        .actions a.delete {
+            background-color: #dc3545;
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash-messages .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .flash-messages .message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .flash-messages .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+    <p>Bienvenue, {{ session.username }}!</p>
+    <a href="{{ url_for('logout') }}">Déconnexion</a>
+
+    <h2>Liste des utilisateurs</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Rôle</th> 
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        {% if user.is_admin %}
+                            {% if 'modify_admin' in user.permissions %} Super Admin {% else %} Admin {% endif %}
+                        {% else %}
+                            Utilisateur
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if session.role == 'Super Admin' or not user.is_admin %}
+                            <a href="{{ url_for('edit_user', user_id=user.id) }}">Modifier</a>
+                            <a href="{{ url_for('delete_user', user_id=user.id) }}" class="delete">Supprimer</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>        
+    </table>
+</body>
+</html>

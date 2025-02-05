@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Bienvenue sur votre Dashboard</h1>
+        <p>Vous êtes connecté en tant que {{ user.username }}.</p>
+
+        <div class="dashboard-content">
+            <div class="card">
+                <h2>Statistiques</h2>
+                <p>Nombre d'utilisateurs : {{ user_count }}</p>
+                <p>Nombre de connexions : {{ login_count }}</p>
+            </div>
+            <div class="card">
+                <h2>Activités Récentes</h2>
+                <ul>
+                    <li>Connexion réussie</li>
+                    <li>Nouvel utilisateur inscrit</li>
+                </ul>
+            </div>
+        </div>
+        <a href="{{ url_for('logout') }}">Déconnexion</a>
+    </div>
+
+    <!-- Messages flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
