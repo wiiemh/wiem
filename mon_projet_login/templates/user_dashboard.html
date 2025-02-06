@@ -31,14 +31,18 @@
             display: inline-block;
         }
         a:hover {
-            background-color: #e0518d;
+            background-color: #d04579;
         }
     </style>
 </head>
 <body>
     <h1>Bienvenue, {{ username }}!</h1>
-        <!-- Lien pour voir les administrateurs -->
-        <a href="{{ url_for('admin_roles') }}">Voir les utilisateurs et leurs rôles</a>
+
+    <!-- Correct link to dashboard using Flask's url_for -->
+    <a href="{{ url_for('dashboard') }}">Voir le tableau de bord</a>
+
+    <!-- Lien pour voir les administrateurs -->
+    <a href="{{ url_for('admin_roles') }}">Voir les utilisateurs et leurs rôles</a>
 
     <a href="{{ url_for('logout') }}">Déconnexion</a>
 </body>

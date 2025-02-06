@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
+import json  # Ajouter l'importation du module JSON
 from datetime import timedelta
 
 app = Flask(__name__)
@@ -47,23 +48,45 @@ def login():
     cursor = conn.cursor(dictionary=True)
     cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
     user = cursor.fetchone()
-    cursor.close()
-    conn.close()
 
     # Vérification du mot de passe
     if user and check_password_hash(user['password'], password):
         # Enregistre les informations de l'utilisateur dans la session
         session['user_id'] = user['id']
         session['username'] = user['username']
-        session['role'] = 'Super Admin' if 'modify_admin' in user.get('permissions', '') else ('Admin' if user['is_admin'] else 'Utilisateur')
-        
-        session.modified = True
-        flash('Connexion réussie!', 'success')
 
-        # Redirige en fonction du rôle de l'utilisateur
-        if session['role'] in ['Admin', 'Super Admin']:
-            return redirect(url_for('admin_dashboard'))
-        return redirect(url_for('user_dashboard'))
+    # Interpréter la colonne `permissions` comme un tableau JSON
+    permissions = json.loads(user['permissions']) if user['permissions'] else []
+
+    # Affichez le contenu des permissions pour vérifier
+    print(permissions)  # Ajoutez cette ligne ici pour voir les permissions
+
+    # Assigner un rôle basé sur les permissions
+    if 'super_admin' in permissions:
+        session['role'] = 'Super Admin'
+    elif user['is_admin']:
+        session['role'] = 'Admin'
+    else:
+        session['role'] = 'Utilisateur'
+
+    # Enregistre la connexion de l'utilisateur
+    cursor.execute("INSERT INTO logins (user_id) VALUES (%s)", (user['id'],))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    session.modified = True
+    flash('Connexion réussie!', 'success')
+
+    # Redirige en fonction du rôle de l'utilisateur
+    if session['role'] in ['Admin', 'Super Admin']:
+        return redirect(url_for('admin_dashboard'))
+    return redirect(url_for('user_dashboard'))
+
+    # Si l'authentification échoue
+    cursor.close()
+    conn.close()
     
     flash('Email ou mot de passe incorrect', 'error')
     return redirect(url_for('home'))
@@ -90,7 +113,7 @@ def signup():
         # Insère l'utilisateur dans la base de données avec un rôle utilisateur par défaut
         cursor.execute(
             'INSERT INTO users (username, email, password, is_admin, permissions) VALUES (%s, %s, %s, %s, %s)',
-            (name, email, hashed_password, False, '')  # Par défaut, utilisateur normal
+            (name, email, hashed_password, False, json.dumps([]))  # Par défaut, permissions vide (utilisateur normal)
         )
         conn.commit()
         flash('Inscription réussie! Vous pouvez maintenant vous connecter.', 'success')
@@ -119,11 +142,26 @@ def admin_dashboard():
     cursor.close()
     conn.close()
 
-    # Assigne un rôle à chaque utilisateur
+                # Assigne un rôle à chaque utilisateur
     for user in users:
-        user['role'] = 'Super Admin' if 'modify_admin' in user.get('permissions', '') else ('Admin' if user['is_admin'] else 'Utilisateur')
+        # Assigne le rôle de 'Super Admin' si l'utilisateur a la permission 'super_admin'
+        if 'super_admin' in json.loads(user.get('permissions', '[]')):
+            user['role'] = 'Super Admin'
+        elif user['is_admin']:
+            user['role'] = 'Admin'
+        else:
+            user['role'] = 'Utilisateur'
 
     return render_template('admin_dashboard.html', users=users)
+
+@app.route('/user/dashboard')
+def user_dashboard():
+    if 'user_id' not in session:
+        flash('Veuillez vous connecter pour accéder à cette page.', 'error')
+        return redirect(url_for('home'))
+
+    return render_template('user_dashboard.html', username=session.get('username'))
+
 
 # Route pour afficher le tableau des rôles (accessible à tous les utilisateurs connectés)
 @app.route('/admin/roles')
@@ -143,8 +181,15 @@ def admin_roles():
 
     # Assigne un rôle à chaque utilisateur
     for user in users:
-        user['role'] = 'Super Admin' if 'modify_admin' in user.get('permissions', '') else ('Admin' if user['is_admin'] else 'Utilisateur')
+        # Assigne le rôle de 'Super Admin' si l'utilisateur a la permission 'super_admin'
+        if 'super_admin' in json.loads(user.get('permissions', '[]')):
+            user['role'] = 'Super Admin'
+        elif user['is_admin']:
+            user['role'] = 'Admin'
+        else:
+            user['role'] = 'Utilisateur'
 
+    # Affiche le tableau des utilisateurs avec leurs rôles
     return render_template('admin_roles.html', users=users)
 
 # Route pour modifier un utilisateur (réservée aux administrateurs)
@@ -178,7 +223,7 @@ def edit_user(user_id):
 
         cursor.execute(
             'UPDATE users SET username = %s, email = %s, is_admin = %s, permissions = %s WHERE id = %s',
-            (username, email, is_admin, permissions, user_id)
+            (username, email, is_admin, json.dumps(permissions.split(',')), user_id)
         )
         conn.commit()
         flash("Utilisateur mis à jour avec succès", "success")
@@ -205,23 +250,12 @@ def delete_user(user_id):
         conn.commit()
         flash('Utilisateur supprimé avec succès.', 'success')
     except Exception as e:
-        flash('Une erreur est survenue lors de la suppression de l\'utilisateur.', 'error')
-        print(e)  # Pour le débogage
+        flash(f"Erreur lors de la suppression : {e}", 'error')
     finally:
         cursor.close()
         conn.close()
 
-    return redirect(url_for('admin_roles'))
-
-# Route pour afficher le tableau de bord des utilisateurs
-@app.route('/user_dashboard')
-def user_dashboard():
-    # Vérifie si l'utilisateur est connecté
-    if 'user_id' not in session:
-        return redirect(url_for('home'))
-    
-    return render_template('user_dashboard.html', username=session.get('username'))
-
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/dashboard')
 def dashboard():
@@ -249,13 +283,13 @@ def dashboard():
 
     return render_template('dashboard.html', user=user, user_count=user_count, login_count=login_count)
 
-# Route pour la déconnexion
 @app.route('/logout')
 def logout():
-    # Supprime toutes les données de la session
+    # Supprimer toutes les données de la session
     session.clear()
     flash('Vous avez été déconnecté.', 'info')
-    return redirect(url_for('home'))
+    return redirect(url_for('home'))  # Redirige vers la page d'accueil après déconnexion
 
+# Exécute l'application Flask
 if __name__ == '__main__':
     app.run(debug=True)
